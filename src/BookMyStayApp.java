@@ -7,7 +7,7 @@
  * Use Case 1: Application Entry & Welcome Message
  *
  * Description:
- * This class represents the entry point of the
+ * This class represents the entry point of
  * Hotel Booking Management System.
  *
  * At this stage, the application:
