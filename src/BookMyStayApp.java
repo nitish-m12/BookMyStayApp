@@ -1,58 +1,181 @@
-import java.util.HashMap;
-import java.util.Map;
-
+import java.util.*;
 /**
- * ============================================================
- * MAIN CLASS: UseCase6TrainConsistMgmt
- * ============================================================
- * Use Case 6: Map Bogie to Capacity (HashMap)
+ * CLASS: Service
+ * -----------------------------------------
+ * Represents an optional add-on service
+ * that can be attached to a reservation.
  *
- * Description:
- * This program maps each bogie to its seating/load capacity
- * using a HashMap (key-value structure).
+ * Examples:
+ * - Breakfast
+ * - Airport Pickup
  *
- * Key Features:
- * - Stores bogie name as key
- * - Stores capacity as value
- * - Allows fast lookup and retrieval
+ * Each service has:
+ * - serviceName → Name of the service
+ * - cost → Price of the service
+ */
+class Service {
+
+    // Name of the service
+    private String serviceName;
+
+    // Cost of the service
+    private double cost;
+
+    /**
+     * Constructor to initialize service details
+     *
+     * @param serviceName Name of the service
+     * @param cost Cost of the service
+     */
+    public Service(String serviceName, double cost) {
+        this.serviceName = serviceName;
+        this.cost = cost;
+    }
+
+    /**
+     * Returns the name of the service
+     */
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    /**
+     * Returns the cost of the service
+     */
+    public double getCost() {
+        return cost;
+    }
+}
+/**
+ * CLASS: AddOnServiceManager
+ * -----------------------------------------
+ * Manages add-on services linked to reservations.
  *
- * Concepts Used:
- * - HashMap
- * - Map Interface
- * - Key-Value Mapping
- * - entrySet() iteration
- *
- * Author: Student
- * Version: 6.0
+ * Responsibilities:
+ * - Store services per reservation
+ * - Add new services
+ * - Calculate total service cost
+ * - Display selected services
+ */
+class AddOnServiceManager {
+
+    /**
+     * Map Structure:
+     * Key   → Reservation ID (String)
+     * Value → List of Services
+     *
+     * Represents One-to-Many relationship:
+     * One Reservation → Multiple Services
+     */
+    private Map<String, List<Service>> servicesByReservation;
+
+    /**
+     * Constructor initializes the map
+     */
+    public AddOnServiceManager() {
+        servicesByReservation = new HashMap<>();
+    }
+
+    /**
+     * Adds a service to a specific reservation
+     *
+     * @param reservationId Unique reservation ID
+     * @param service Service to be added
+     */
+    public void addService(String reservationId, Service service) {
+
+        // If reservation does not exist, create new list
+        servicesByReservation
+                .computeIfAbsent(reservationId, k -> new ArrayList<>())
+                .add(service);
+    }
+
+    /**
+     * Calculates total cost of all services
+     * for a given reservation
+     *
+     * @param reservationId Reservation ID
+     * @return Total cost
+     */
+    public double calculateTotalServiceCost(String reservationId) {
+
+        double total = 0;
+
+        // Get services list
+        List<Service> services = servicesByReservation.get(reservationId);
+
+        // Sum up all service costs
+        if (services != null) {
+            for (Service s : services) {
+                total += s.getCost();
+            }
+        }
+
+        return total;
+    }
+
+    /**
+     * Displays all services for a reservation
+     *
+     * @param reservationId Reservation ID
+     */
+    public void displayServices(String reservationId) {
+
+        List<Service> services = servicesByReservation.get(reservationId);
+
+        if (services == null || services.isEmpty()) {
+            System.out.println("No services added.");
+            return;
+        }
+
+        System.out.println("Selected Services:");
+
+        for (Service s : services) {
+            System.out.println("- " + s.getServiceName() + " : " + s.getCost());
+        }
+    }
+}
+/**
+ * MAIN CLASS: UseCase7AddOnServiceSelection
+ * -----------------------------------------
+ * Demonstrates how add-on services are:
+ * - Created
+ * - Attached to reservation
+ * - Calculated
  */
 public class BookMyStayApp {
 
     public static void main(String[] args) {
 
-        System.out.println("======================================");
-        System.out.println("UC6 - Map Bogie to Capacity (HashMap)");
-        System.out.println("======================================\n");
+        // Create manager object
+        AddOnServiceManager manager = new AddOnServiceManager();
+
+        // Sample reservation
+        String reservationId = "Single-1";
 
         /**
-         * HashMap:
-         * Stores data in key -> value format
+         * Create services
          */
-        Map<String, Integer> capacityMap = new HashMap<>();
-
-        // Step 1: Insert bogie capacities
-        capacityMap.put("Sleeper", 72);
-        capacityMap.put("AC Chair", 60);
-        capacityMap.put("First Class", 40);
+        Service breakfast = new Service("Breakfast", 500);
+        Service airportPickup = new Service("Airport Pickup", 1000);
 
         /**
-         * Step 2: Iterate using entrySet()
+         * Add services to reservation
          */
-        System.out.println("Bogie Capacity Details:\n");
+        manager.addService(reservationId, breakfast);
+        manager.addService(reservationId, airportPickup);
 
-        for (Map.Entry<String, Integer> entry : capacityMap.entrySet()) {
-            System.out.println("Bogie: " + entry.getKey());
-            System.out.println("Capacity: " + entry.getValue());
-            System.out.println();
-        }
+        /**
+         * Display services
+         */
+        System.out.println("Reservation ID: " + reservationId);
+        manager.displayServices(reservationId);
+
+        /**
+         * Calculate total cost
+         */
+        double totalCost = manager.calculateTotalServiceCost(reservationId);
+
+        System.out.println("Total Add-On Cost: " + totalCost);
     }
 }
